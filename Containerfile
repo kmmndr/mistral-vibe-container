@@ -1,26 +1,29 @@
-ARG FEDORA_VERSION=latest
+ARG ALPINE_VERSION=edge
 
-FROM registry.fedoraproject.org/fedora:${FEDORA_VERSION}
+FROM alpine:${ALPINE_VERSION}
 
-# Install base packages including curl (needed for uv install)
-RUN dnf install -y \
+# Install base packages
+RUN apk add --no-cache \
+    alsa-lib-dev \
+    bash \
     bubblewrap \
     socat \
     curl \
-    python3.12 \
+    pkgconf \
+    python3 \
     rustup \
-    && dnf clean all
+    sudo \
+    uv
 
 # Install additional dev packages
 COPY packages.txt /opt/packages.txt
-RUN dnf install -y $(cat /opt/packages.txt) \
-    && dnf clean all
+RUN apk add --no-cache $(cat /opt/packages.txt)
 
 # Create user and group
 ARG UID=1000
 ARG GID=1000
-RUN groupadd -g "${GID}" vibe
-RUN useradd -u "${UID}" -g "${GID}" -m vibe
+RUN addgroup -g "${GID}" vibe \
+    && adduser -u "${UID}" -G vibe -D vibe
 COPY sudoers /etc/sudoers.d/vibe
 
 # Install Rust toolchain using rustup
@@ -29,12 +32,10 @@ RUN su - vibe -c "rustup-init -y --default-toolchain stable --profile default" \
     && su - vibe -c "source /home/vibe/.cargo/env && rustup component add rustfmt clippy"
 USER ${UID}:${GID}
 
-# Install uv (modern Python package manager)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/home/vibe/.local/bin:/home/vibe/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:${PATH}"
+ENV PATH="/home/vibe/.local/bin:/home/vibe/.cargo/bin:${PATH}"
 
 # Install mistral-vibe using uv
-RUN uv tool install mistral-vibe
+RUN export RUSTFLAGS="-C target-feature=-crt-static"; uv tool install mistral-vibe
 
 ENV BASH_ENV=/home/vibe/.bash_environment
 COPY environment $BASH_ENV

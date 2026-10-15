@@ -37,11 +37,11 @@ Run [Mistral Vibe](https://github.com/mistralai/mistral-vibe) in a container for
 
 | File | Description |
 |------|-------------|
-| `Containerfile` | Container definition (Fedora + Python 3.12 + uv) |
+| `Containerfile` | Container definition (Alpine + Python 3 + uv) |
 | `build.sh` | Build script for the container image |
 | `vibe` | Launch script to run mistral-vibe in a container |
 | `environment` | Shell environment setup |
-| `packages.txt` | Additional Fedora packages to install |
+| `packages.txt` | Additional Alpine packages to install |
 | `sudoers` | Sudo permissions for the container user |
 
 ## Configuration
