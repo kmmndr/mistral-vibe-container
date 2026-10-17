@@ -2,6 +2,17 @@
 
 set -e
 
+# Resolve symlinks so the script works when invoked via a shortcut (make install)
+script="${0}"
+while [ -L "${script}" ]; do
+    target="$(readlink "${script}")"
+    case "${target}" in
+        /*) script="${target}" ;;
+        *) script="$(dirname "${script}")/${target}" ;;
+    esac
+done
+repo_dir="$(cd "$(dirname "${script}")" && pwd)"
+
 proj_name="$(basename "${PWD}")"
 
 mkdir -p ~/.vibe
@@ -10,7 +21,7 @@ if ! [ -e ~/.vibe/config.toml ]; then
 fi
 
 if ! podman image exists mistral-vibe:latest; then
-    "$(dirname "${0}")/build.sh"
+    "${repo_dir}/build.sh"
 fi
 
 # Create directory for additional git config if it doesn't exist

@@ -33,11 +33,20 @@ Run [Mistral Vibe](https://github.com/mistralai/mistral-vibe) in a container for
    /path/to/mistral-vibe-container/vibe
    ```
 
+4. **Optional: install a shortcut in `~/.local/bin`:**
+
+   ```bash
+   make install        # copies files to ~/.local/share/mistral-vibe-container
+                       # and creates ~/.local/bin/vibe (override with PREFIX=...)
+   make uninstall      # removes everything
+   ```
+
 ## Files
 
 | File | Description |
 |------|-------------|
 | `Containerfile` | Container definition (Alpine + Python 3 + uv) |
+| `Makefile` | `make install` / `make uninstall` to install into `PREFIX` (default `~/.local`) |
 | `build.sh` | Build script for the container image |
 | `vibe` | Launch script to run mistral-vibe in a container |
 | `environment` | Shell environment setup |
