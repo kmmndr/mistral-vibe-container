@@ -28,14 +28,17 @@ COPY sudoers /etc/sudoers.d/vibe
 
 # Install Rust toolchain using rustup
 USER root
-RUN su - vibe -c "rustup-init -y --default-toolchain stable --profile default" \
+RUN su - vibe -c "rustup-init -y --default-toolchain stable --profile minimal" \
     && su - vibe -c "source /home/vibe/.cargo/env && rustup component add rustfmt clippy"
 USER ${UID}:${GID}
 
 ENV PATH="/home/vibe/.local/bin:/home/vibe/.cargo/bin:${PATH}"
 
 # Install mistral-vibe using uv
-RUN export RUSTFLAGS="-C target-feature=-crt-static"; uv tool install mistral-vibe
+RUN export RUSTFLAGS="-C target-feature=-crt-static"; \
+    uv tool install mistral-vibe \
+    && uv cache clean \
+    && rm -rf /home/vibe/.cargo/registry
 
 ENV BASH_ENV=/home/vibe/.bash_environment
 COPY environment $BASH_ENV
